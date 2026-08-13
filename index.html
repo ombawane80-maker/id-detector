@@ -1,59 +1,446 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>NovaSocial • Test Profile Creator</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NovaSocial • Account Detector</title>
+
 <style>
-*{box-sizing:border-box}body{margin:0;font-family:Inter,Arial,sans-serif;background:#0b1020;color:#eef2ff}
-.wrap{max-width:980px;margin:auto;padding:30px 18px}.brand{font-size:28px;font-weight:800;margin-bottom:6px}
-.sub{color:#9aa6c2;margin-bottom:24px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
-.card{background:#121a2e;border:1px solid #26324d;border-radius:22px;padding:22px;box-shadow:0 15px 45px #0004}
-label{display:block;color:#aeb9d2;font-size:13px;margin:12px 0 6px}input,textarea{width:100%;padding:12px;border-radius:12px;border:1px solid #34415f;background:#0b1224;color:white}
-textarea{min-height:90px;resize:vertical}.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-button{margin-top:18px;border:0;border-radius:12px;padding:12px 16px;background:#7c5cff;color:white;font-weight:700;cursor:pointer}
-button.secondary{background:#25314b}.status{margin-top:14px;padding:12px;border-radius:12px;background:#0b1224;color:#b9c5df;white-space:pre-wrap}
-.profile{display:none;text-align:center}.avatar{width:110px;height:110px;border-radius:50%;margin:10px auto;background:#293553;display:grid;place-items:center;font-size:42px}
-.stat{display:flex;justify-content:space-around;margin:18px 0}.stat b{display:block;font-size:20px}.muted{color:#98a5c2}
-a{color:#a994ff;word-break:break-all}@media(max-width:750px){.grid{grid-template-columns:1fr}}
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  font-family:Inter,Arial,sans-serif;
+  background:#080d19;
+  color:#eef2ff
+}
+
+.wrap{
+  max-width:900px;
+  margin:auto;
+  padding:35px 18px
+}
+
+h1{
+  font-size:34px
+}
+
+.sub{
+  color:#9aa6c2
+}
+
+.card{
+  background:#121a2e;
+  border:1px solid #26324d;
+  border-radius:22px;
+  padding:24px;
+  margin-top:22px
+}
+
+input{
+  width:100%;
+  padding:14px;
+  border-radius:12px;
+  border:1px solid #34415f;
+  background:#0b1224;
+  color:#fff
+}
+
+button{
+  margin-top:14px;
+  padding:12px 18px;
+  border:0;
+  border-radius:12px;
+  background:#7c5cff;
+  color:#fff;
+  font-weight:700;
+  cursor:pointer
+}
+
+.result{
+  display:none
+}
+
+.score{
+  font-size:62px;
+  font-weight:900;
+  margin:10px 0
+}
+
+.risk{
+  font-size:18px;
+  font-weight:800
+}
+
+.reason{
+  padding:10px 12px;
+  background:#0b1224;
+  border-radius:10px;
+  margin:8px 0
+}
+
+.meter{
+  height:12px;
+  background:#26324d;
+  border-radius:20px;
+  overflow:hidden
+}
+
+.fill{
+  height:100%;
+  width:0;
+  background:#7c5cff;
+  transition:width .5s
+}
+
+.note{
+  color:#98a5c2;
+  font-size:13px;
+  line-height:1.5
+}
 </style>
 </head>
-<body><main class="wrap">
-<div class="brand">NovaSocial</div><div class="sub">Page 1 • Create controlled test profiles for the detector</div>
-<div class="grid">
-<section class="card">
-<h2>Create test account</h2>
-<label>Username</label><input id="username" placeholder="demo_user_01">
-<label>Bio</label><textarea id="bio" placeholder="Technology learner"></textarea>
-<div class="row"><div><label>Followers</label><input id="followers" type="number" value="8"></div>
-<div><label>Following</label><input id="following" type="number" value="420"></div></div>
-<div class="row"><div><label>Posts</label><input id="posts" type="number" value="1"></div>
-<div><label>Account age (days)</label><input id="ageDays" type="number" value="5"></div></div>
-<label><input id="avatar" type="checkbox" style="width:auto"> Has profile picture</label>
-<button onclick="createProfile()">Create & save profile</button>
-<div id="status" class="status">Firebase is not configured yet.</div>
-</section>
-<section class="card profile" id="profile">
-<div class="avatar" id="avatarBox">👤</div><h2 id="pName"></h2><p class="muted" id="pBio"></p>
-<div class="stat"><div><b id="pFollowers"></b><span class="muted">Followers</span></div><div><b id="pFollowing"></b><span class="muted">Following</span></div><div><b id="pPosts"></b><span class="muted">Posts</span></div></div>
-<p>Share this test profile with Page 2:</p><a id="profileLink"></a>
-</section>
-</div></main>
-<script type="module">
-import {initializeApp} from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
-import {getFirestore,doc,setDoc,serverTimestamp} from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
-import {firebaseConfig} from "../firebase/firebase-config.js";
-const configured=!firebaseConfig.apiKey.startsWith("YOUR_");
-let db=null; if(configured) db=getFirestore(initializeApp(firebaseConfig));
-const status = document.querySelector("#status");
 
-window.createProfile=async()=>{ const username=document.querySelector("#username").value.trim().toLowerCase().replace(/[^a-z0-9._]/g,"");
- if(!username){status.textContent="Enter a username.";return}
- const data={username,bio:document.querySelector("#bio").value.trim(),
- followers:+followers.value||0,following:+following.value||0,posts:+posts.value||0,
- ageDays:+ageDays.value||0,hasProfilePicture:avatar.checked,createdAt:serverTimestamp()};
- if(!configured){status.textContent="Add your Firebase config in firebase/firebase-config.js first.";return}
- try{await setDoc(doc(db,"profiles",username),data);const link=location.origin+location.pathname.replace("mini-instagram/index.html","account-detector/index.html")+"?username="+encodeURIComponent(username);
- document.querySelector("#profile").style.display="block";pName.textContent="@"+username;pBio.textContent=data.bio||"No bio";pFollowers.textContent=data.followers;pFollowing.textContent=data.following;pPosts.textContent=data.posts;profileLink.textContent=link;profileLink.href=link;avatarBox.textContent=data.hasProfilePicture?"🙂":"👤";status.textContent="Saved to Firebase successfully."}
- catch(e){status.textContent="Save failed: "+e.message}
+<body>
+
+<main class="wrap">
+
+  <h1>🔎 NovaSocial Account Detector</h1>
+
+  <p class="sub">
+    Page 2 • Analyze profiles stored in your controlled Firebase demo.
+  </p>
+
+  <section class="card">
+
+    <input
+      id="profileInput"
+      placeholder="Paste profile URL or type username"
+    >
+
+    <button id="analyzeButton">
+      Analyze account
+    </button>
+
+    <div id="status" class="note"></div>
+
+  </section>
+
+  <section class="card result" id="result">
+
+    <h2 id="name"></h2>
+
+    <div class="score" id="score">
+      0/100
+    </div>
+
+    <div class="meter">
+      <div class="fill" id="fill"></div>
+    </div>
+
+    <p class="risk" id="risk"></p>
+
+    <div id="reasons"></div>
+
+    <p class="note">
+      This is a demo suspicion score, not proof that an account is fake.
+      It only evaluates signals available in your test database.
+    </p>
+
+  </section>
+
+</main>
+
+<script type="module">
+
+/* Firebase imports */
+import { initializeApp }
+  from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+
+import {
+  getFirestore,
+  doc,
+  getDoc
 }
-</script></body></html>
+  from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+
+import { firebaseConfig }
+  from "../firebase/firebase-config.js";
+
+
+/* Firebase setup */
+const configured =
+  firebaseConfig &&
+  firebaseConfig.apiKey &&
+  !firebaseConfig.apiKey.startsWith("YOUR_");
+
+let db = null;
+
+if (configured) {
+  db = getFirestore(initializeApp(firebaseConfig));
+}
+
+
+/* Get page elements explicitly */
+const profileInput = document.querySelector("#profileInput");
+const analyzeButton = document.querySelector("#analyzeButton");
+const statusEl = document.querySelector("#status");
+
+const resultEl = document.querySelector("#result");
+const nameEl = document.querySelector("#name");
+const scoreEl = document.querySelector("#score");
+const fillEl = document.querySelector("#fill");
+const riskEl = document.querySelector("#risk");
+const reasonsEl = document.querySelector("#reasons");
+
+
+/* Read username from URL if available */
+const params = new URLSearchParams(location.search);
+
+const urlUsername = params.get("username");
+
+if (urlUsername) {
+  profileInput.value = urlUsername;
+}
+
+
+/* Calculate demo suspicion score */
+function scoreProfile(p) {
+
+  let score = 0;
+  const reasons = [];
+
+  if (!p.hasProfilePicture) {
+    score += 15;
+    reasons.push("No profile picture");
+  }
+
+  if ((p.ageDays || 0) < 14) {
+    score += 20;
+    reasons.push("Very new account");
+  }
+
+  if ((p.posts || 0) === 0) {
+    score += 15;
+    reasons.push("No posts");
+  } else if ((p.posts || 0) <= 2) {
+    score += 10;
+    reasons.push("Very low post count");
+  }
+
+  if ((p.followers || 0) < 10) {
+    score += 10;
+    reasons.push("Very low follower count");
+  }
+
+  if ((p.following || 0) > 300) {
+    score += 15;
+    reasons.push("High following count");
+  }
+
+  if (
+    (p.following || 0) > 0 &&
+    (p.followers || 0) / (p.following || 1) < 0.05
+  ) {
+    score += 10;
+    reasons.push("Unusual follower/following ratio");
+  }
+
+  if (!(p.bio || "").trim()) {
+    score += 5;
+    reasons.push("Empty bio");
+  }
+
+  return {
+    score: Math.min(score, 100),
+    reasons
+  };
+}
+
+
+/* Analyze account */
+async function analyze() {
+
+  if (!configured || !db) {
+    statusEl.textContent =
+      "Add Firebase config first.";
+
+    return;
+  }
+
+
+  let value = profileInput.value.trim();
+
+  if (!value) {
+    statusEl.textContent =
+      "Enter a username or profile URL.";
+
+    resultEl.style.display = "none";
+
+    return;
+  }
+
+
+  let username = "";
+
+
+  /* Support URL containing ?username= */
+  const usernameQuery =
+    value.match(/username=([^&]+)/)?.[1];
+
+  /* Support /profile/username URL */
+  const profilePath =
+    value.match(/profile\/([^/?#]+)/)?.[1];
+
+
+  if (usernameQuery) {
+    username = usernameQuery;
+  } else if (profilePath) {
+    username = profilePath;
+  } else {
+    username = value.replace(/^@/, "");
+  }
+
+
+  username = decodeURIComponent(username)
+    .trim()
+    .toLowerCase();
+
+
+  if (!username) {
+    statusEl.textContent =
+      "Enter a username or profile URL.";
+
+    resultEl.style.display = "none";
+
+    return;
+  }
+
+
+  statusEl.textContent =
+    "Checking Firebase...";
+
+
+  try {
+
+    const profileRef =
+      doc(db, "profiles", username);
+
+    const snap =
+      await getDoc(profileRef);
+
+
+    if (!snap.exists()) {
+
+      statusEl.textContent =
+        "Profile not found in the demo database.";
+
+      resultEl.style.display = "none";
+
+      return;
+    }
+
+
+    const profileData = snap.data();
+
+    const result = scoreProfile(profileData);
+
+
+    /* Show result */
+    resultEl.style.display = "block";
+
+
+    nameEl.textContent =
+      "@" + (profileData.username || username);
+
+
+    scoreEl.textContent =
+      result.score + "/100";
+
+
+    fillEl.style.width =
+      result.score + "%";
+
+
+    if (result.score >= 81) {
+
+      riskEl.textContent =
+        "🔴 Very High Risk";
+
+    } else if (result.score >= 61) {
+
+      riskEl.textContent =
+        "🟠 High Risk";
+
+    } else if (result.score >= 31) {
+
+      riskEl.textContent =
+        "🟡 Medium Risk";
+
+    } else {
+
+      riskEl.textContent =
+        "🟢 Low Risk";
+    }
+
+
+    /* Show reasons */
+    if (result.reasons.length) {
+
+      reasonsEl.innerHTML =
+        result.reasons
+          .map(
+            reason =>
+              "<div class='reason'>⚠ " +
+              reason +
+              "</div>"
+          )
+          .join("");
+
+    } else {
+
+      reasonsEl.innerHTML =
+        "<div class='reason'>" +
+        "No strong suspicious signals found." +
+        "</div>";
+    }
+
+
+    statusEl.textContent =
+      "Analysis complete.";
+
+  } catch (error) {
+
+    console.error(error);
+
+    statusEl.textContent =
+      "Analysis failed: " + error.message;
+
+    resultEl.style.display = "none";
+  }
+}
+
+
+/* Button click */
+analyzeButton.addEventListener(
+  "click",
+  analyze
+);
+
+
+/* Also allow Enter key */
+profileInput.addEventListener(
+  "keydown",
+  event => {
+
+    if (event.key === "Enter") {
+      analyze();
+    }
+
+  }
+);
+
+</script>
+
+</body>
+</html>
